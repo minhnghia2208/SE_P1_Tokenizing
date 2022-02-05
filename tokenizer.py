@@ -15,7 +15,8 @@ def tokenization():
     def abbrivation(str):       
         arr = str.split('.')
         for ch in arr:
-            if len(ch) > 1: return punctuation(str)
+            if len(ch) > 1: 
+                return punctuation(str)
         
         return [''.join(arr)]
     
@@ -58,17 +59,23 @@ def tokenization():
         for ele in arr:
             ele = contraction(ele.lower())
             for k in abbrivation(ele):
-                ans.append(k)
-            # ele = punctuation(ele)
+                if (k != ''):
+                    ans.append(k)
+        ans.append('\n')
         line = f.readline()
     
-    print(ans)
-        
     f.close()
+    return " ".join(ans)
     
-    # UNIT TEST AREA
-    # print(abbrivation("u.s.d.a.s.d"))
-    # print(contraction("don't"))
-    # print(punctuation("100,200*300"))
+def stemming():
+    f = open(fStopWord, "r")
+    arr = tokenization().split()
+    print(arr)
+    line = f.readline()
+    while line:
+        # Get StopWord
+        sw = line.split()[0]
+        line = f.readline()
+        
     
-tokenization()
+stemming()
