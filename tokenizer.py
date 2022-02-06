@@ -1,4 +1,6 @@
+import re
 # Connection String
+# from sympy import true
 fStopWord = "stopwords.txt"
 fTokenA = "tokenization-input-part-A.txt"
 fTokenB = "tokenization-input-part-B.txt"
@@ -61,7 +63,7 @@ def tokenization():
             for k in abbrivation(ele):
                 if (k != ''):
                     ans.append(k)
-        ans.append('\n')
+        # ans.append('\n')
         line = f.readline()
     
     f.close()
@@ -70,12 +72,95 @@ def tokenization():
 def stemming():
     f = open(fStopWord, "r")
     arr = tokenization().split()
-    print(arr)
+    ans = []
+    hash = {}
     line = f.readline()
+    # Init hashmap of stopwords
     while line:
-        # Get StopWord
         sw = line.split()[0]
+        hash[line.split()[0]] = True
         line = f.readline()
-        
+    for i in range(0, len(arr)):
+        if not hash.get(arr[i]): ans.append(arr[i])
     
-stemming()
+    return "".join(ans)
+
+def porterStemmer():
+    def popHelper(n, str):
+        temp = list(str)
+        for i in range(0, n):
+            temp.pop()
+        return "".join(temp)
+    
+    # Param string
+    # Return string
+    def step1a(str):
+        # Replace 'sses' by 'ss'
+        if re.search("sses$", str):
+            temp = list(str)
+            temp.pop()
+            temp.pop()
+            str = "".join(temp)
+        
+        # Delete 's' 
+        if re.search("[aeiou][^aeiou]+s$", str) and not re.search("(us|ss)$", str):
+            temp = list(str)
+            temp.pop()
+            str = "".join(temp)
+        
+        # Replace 'ied' or 'ies' by 'i' or 'ie'
+        if re.search("..+(ied|ies)", str):
+            temp = list(str)
+            temp.pop()
+            temp.pop()
+            str = "".join(temp)
+        elif re.search(".(ied|ies)", str):
+            temp = list(str)
+            temp.pop()
+            str = "".join(temp)
+            
+        print(str)
+        return str
+        
+    def step1b(str):
+        # Replace 'eed', 'eedly'
+        if re.search("[aeiou][^aeiou]+eedly$", str):
+            temp = list(str)
+            temp.pop()
+            temp.pop()
+            str = "".join(temp)
+        elif re.search("[aeiou][^aeiou]+eed$", str):
+            temp = list(str)
+            temp.pop()
+            str = "".join(temp)
+            
+        # Delete 'ed', 'edly', 'ing', 'ingly'
+        isDel = False
+        if re.search("[aeiou].*ed$", str):
+            str = popHelper(2, str)
+            isDel = True
+        elif re.search("[aeiou].*edly$", str):
+            str = popHelper(4, str)
+            isDel = True
+        elif re.search("[aeiou].*ing$", str):
+            str = popHelper(3, str)
+            isDel = True
+        elif re.search("[aeiou].*ingly$", str):
+            str = popHelper(5, str)
+            isDel = True
+        
+        # Then end with 'at', 'bl', 'iz' add 'e'
+        if isDel:
+            if re.search("(at)|(bl)|(iz)", str):
+                temp = list(str)
+                temp.append('e')
+                str = "".join(temp)
+            # elif re.search("")
+            
+        print(str)
+        return str
+    # arr = stemming().split()
+    step1b('pirbring')
+
+# stemming()
+porterStemmer()
