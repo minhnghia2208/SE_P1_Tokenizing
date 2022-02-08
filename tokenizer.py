@@ -1,12 +1,22 @@
 import re
+import matplotlib.pyplot as plt
+
 # Connection String
 # from sympy import true
-fStopWord = "stopwords.txt"
-fTokenA = "tokenization-input-part-A.txt"
-fTokenB = "tokenization-input-part-B.txt"
+connectionString = {
+    "fStopWord": "stopwords.txt",
+    "fTokenA": "tokenization-input-part-A.txt",
+    "fTokenB": "tokenization-input-part-B.txt"
+}
+
 #
 
-def tokenization():
+# Lower Case
+# Abbrivation
+# Remove '
+# Split 
+
+def tokenization(file):
     # Param: string
     # Return: string
     def contraction(str): 
@@ -52,7 +62,7 @@ def tokenization():
         else: return [str]
     
     # Body
-    f = open(fTokenA, "r")
+    f = open(file, "r")
     ans = []
     line = f.readline()
     while line:
@@ -63,19 +73,18 @@ def tokenization():
             for k in abbrivation(ele):
                 if (k != ''):
                     ans.append(k)
-        # ans.append('\n')
         line = f.readline()
     
     f.close()
     # return " ".join(ans)
     return ans
     
-def stemming():
-    arr = tokenization()
+def stemming(file):
+    arr = tokenization(file)
     ans = []
     hash = {}
     
-    f = open(fStopWord, "r")
+    f = open(connectionString['fStopWord'], "r")
     line = f.readline()
     # Init hashmap of stopwords
     while line:
@@ -87,7 +96,7 @@ def stemming():
     
     return ans
 
-def porterStemmer():
+def porterStemmer(file):
     def popHelper(n, str):
         temp = list(str)
         for i in range(0, n):
@@ -148,15 +157,34 @@ def porterStemmer():
         return str
     
     ans = []
-    arr = stemming()
+    arr = stemming(file)
     for i in arr:
         ans.append(step1b(step1a(i)))
     
     return ans
 
-arr = porterStemmer()
+def first300(arr):
+    f = open('terms.txt', "w")
+    dict = {}
+    index = 0
+    
+    for i in arr:
+        if dict.get(i): dict[i] += 1
+        else: dict[i] = 1
+    dict = sorted(dict.items(), key = lambda kv:(kv[1], kv[0]), reverse=True)
+    for i in dict:
+        index += 1
+        if index <= 300:
+            f.write(i[0] + ' ' + str(i[1]) + '\n')
+        else: break
+    f.close()
+        
+    
+arr = porterStemmer(connectionString['fTokenB'])
 f = open('tokenized.txt', "w")
 for i in arr:
     f.write(i)
     f.write('\n')
 f.close()
+
+first300(arr)
