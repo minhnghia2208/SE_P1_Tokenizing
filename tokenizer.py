@@ -67,13 +67,15 @@ def tokenization():
         line = f.readline()
     
     f.close()
-    return " ".join(ans)
+    # return " ".join(ans)
+    return ans
     
 def stemming():
-    f = open(fStopWord, "r")
-    arr = tokenization().split()
+    arr = tokenization()
     ans = []
     hash = {}
+    
+    f = open(fStopWord, "r")
     line = f.readline()
     # Init hashmap of stopwords
     while line:
@@ -83,7 +85,7 @@ def stemming():
     for i in range(0, len(arr)):
         if not hash.get(arr[i]): ans.append(arr[i])
     
-    return "".join(ans)
+    return ans
 
 def porterStemmer():
     def popHelper(n, str):
@@ -97,42 +99,25 @@ def porterStemmer():
     def step1a(str):
         # Replace 'sses' by 'ss'
         if re.search("sses$", str):
-            temp = list(str)
-            temp.pop()
-            temp.pop()
-            str = "".join(temp)
+            str = popHelper(2, str)
         
         # Delete 's' 
         if re.search("[aeiou][^aeiou]+s$", str) and not re.search("(us|ss)$", str):
-            temp = list(str)
-            temp.pop()
-            str = "".join(temp)
+            str = popHelper(1, str)
         
         # Replace 'ied' or 'ies' by 'i' or 'ie'
         if re.search("..+(ied|ies)", str):
-            temp = list(str)
-            temp.pop()
-            temp.pop()
-            str = "".join(temp)
+            str = popHelper(2, str)
         elif re.search(".(ied|ies)", str):
-            temp = list(str)
-            temp.pop()
-            str = "".join(temp)
-            
-        print(str)
+            str = popHelper(1, str)
         return str
         
     def step1b(str):
         # Replace 'eed', 'eedly'
         if re.search("[aeiou][^aeiou]+eedly$", str):
-            temp = list(str)
-            temp.pop()
-            temp.pop()
-            str = "".join(temp)
+            str = popHelper(2, str)
         elif re.search("[aeiou][^aeiou]+eed$", str):
-            temp = list(str)
-            temp.pop()
-            str = "".join(temp)
+            str = popHelper(1, str)
             
         # Delete 'ed', 'edly', 'ing', 'ingly'
         isDel = False
@@ -149,18 +134,29 @@ def porterStemmer():
             str = popHelper(5, str)
             isDel = True
         
-        # Then end with 'at', 'bl', 'iz' add 'e'
         if isDel:
-            if re.search("(at)|(bl)|(iz)", str):
+            # Then end with 'at', 'bl', 'iz' or if word is short add 'e'
+            if re.search("((at)|(bl)|(iz))$", str) or (len(str) <= 3 and len(str) > 0):
                 temp = list(str)
                 temp.append('e')
                 str = "".join(temp)
-            # elif re.search("")
-            
-        print(str)
+            # End with double letter that is not 'll', 'ss', 'zz'
+            else:
+                temp = list(str)
+                if temp[-1] == temp[-2] and not re.search("((ll)|(ss)|(zz))$", str):
+                    str = popHelper(1, str)
         return str
-    # arr = stemming().split()
-    step1b('pirbring')
+    
+    ans = []
+    arr = stemming()
+    for i in arr:
+        ans.append(step1b(step1a(i)))
+    
+    return ans
 
-# stemming()
-porterStemmer()
+arr = porterStemmer()
+f = open('tokenized.txt', "w")
+for i in arr:
+    f.write(i)
+    f.write('\n')
+f.close()
