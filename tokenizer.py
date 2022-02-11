@@ -1,20 +1,10 @@
 import re
-import matplotlib.pyplot as plt
-
 # Connection String
-# from sympy import true
 connectionString = {
     "fStopWord": "stopwords.txt",
     "fTokenA": "tokenization-input-part-A.txt",
     "fTokenB": "tokenization-input-part-B.txt"
 }
-
-#
-
-# Lower Case
-# Abbrivation
-# Remove '
-# Split 
 
 def tokenization(file):
     # Param: string
@@ -24,13 +14,12 @@ def tokenization(file):
     
     # Param: string
     # Return: string[]
-    def abbrivation(str):       
+    def abbreviation(str):
         arr = str.split('.')
-        for ch in arr:
-            if len(ch) > 1: 
-                return punctuation(str)
+        if re.search("[a-z][.]([a-z][.])+", str):
+            return punctuation(''.join(arr))
         
-        return [''.join(arr)]
+        else: return punctuation(str)
     
     # Param: string
     # Return: string[]
@@ -38,14 +27,12 @@ def tokenization(file):
         ans = []
         isPun = False
         # string to char array as string isn't mutable
+        str = contraction(str)
         arr = list(str)
         
         for i in range(0, len(arr)):
             asc = ord(arr[i])
-            if not (
-                (asc >= 97 and asc <= 122) or # lower case char
-                (asc >= 48 and asc <= 57)   # number
-                ):                
+            if not re.search("[a-z]|[0-9]", arr[i]):                
                 isPun = True
                 # recursively remove punctuation
                 for j in str.split(arr[i]):
@@ -61,7 +48,6 @@ def tokenization(file):
         if isPun: return ans
         else: return [str]
     
-    # Body
     f = open(file, "r")
     ans = []
     line = f.readline()
@@ -69,14 +55,21 @@ def tokenization(file):
         arr = line.split()
                 
         for ele in arr:
-            ele = contraction(ele.lower())
-            for k in abbrivation(ele):
+            for k in abbreviation(ele.lower()):
                 if (k != ''):
                     ans.append(k)
         line = f.readline()
     
     f.close()
-    # return " ".join(ans)
+    
+    # Unit Test: All empty element will be removed later
+    assert abbreviation("u.s.a.") == ["usa"], "Is abbreviation 1"
+    assert abbreviation("u.s.a.,") == ["usa",""], "Is abbreviation 2"
+    assert abbreviation("u.s.,a.") == ["us","a"], "Not abbreviation 1"
+    assert abbreviation("u*.*s.,a'.") == ['u', '', '', 's', '', 'a', ''], "Not abbreviation 2"
+    assert abbreviation("don't") == ["dont"], "Is contraction"
+    assert abbreviation("ph.d") == ["ph", "d"], "Removimg punctuation"
+    assert abbreviation("p'h.d") == ["ph", "d"], "Contraction within puntuation"
     return ans
     
 def stemming(file):
@@ -167,24 +160,49 @@ def first300(arr):
     f = open('terms.txt', "w")
     dict = {}
     index = 0
-    
+
     for i in arr:
         if dict.get(i): dict[i] += 1
         else: dict[i] = 1
+        
     dict = sorted(dict.items(), key = lambda kv:(kv[1], kv[0]), reverse=True)
     for i in dict:
         index += 1
-        if index <= 300:
-            f.write(i[0] + ' ' + str(i[1]) + '\n')
+        if index <= 300: f.write(i[0] + ' ' + str(i[1]) + '\n')
         else: break
     f.close()
         
+def gatherData(arr):
+    px = open('x.txt', 'w')
+    py = open('y.txt', 'w')
+    # vocab, collection = [], []
+    vocabCount, collectionCount = 0, 0
+    dict = {}
     
-arr = porterStemmer(connectionString['fTokenB'])
+    for i in arr:
+        collectionCount += 1
+        # collection.append(collectionCount)
+        
+        if not dict.get(i): 
+            vocabCount += 1
+            dict[i] = True
+        # vocab.append(vocabCount)
+        
+        px.write(str(collectionCount) + '\n')
+        py.write(str(vocabCount) + '\n')
+        
+    px.close()
+    py.close()
+    
+# Tokenized A
+arr = porterStemmer(connectionString['fTokenA'])
 f = open('tokenized.txt', "w")
 for i in arr:
     f.write(i)
     f.write('\n')
 f.close()
 
+# Tokenized Moby Dick
+arr = porterStemmer(connectionString['fTokenB'])
 first300(arr)
+gatherData(arr)

@@ -293,8 +293,8 @@ island 51
 hoist 51
 draw 51
 common 51
-* 51
 teeth 50
 suddenly 50
 stop 50
 rush 50
+rig 50
